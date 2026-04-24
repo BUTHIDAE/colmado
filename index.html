@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Colmado Doña Juana - Venta por Unidad y Libra</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: system-ui, 'Segoe UI', 'Roboto', sans-serif;
+        }
+        body {
+            background: #f5f1e6;
+            padding: 20px;
+        }
+        .app-container {
+            max-width: 1300px;
+            margin: 0 auto;
+        }
+        /* header */
+        .header {
+            background: #e67e22;
+            color: white;
+            padding: 20px;
+            border-radius: 32px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        .header h1 {
+            font-size: 1.8rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        .cart-badge {
+            background: #2c3e50;
+            display: inline-block;
+            padding: 6px 14px;
+            border-radius: 40px;
+            font-size: 0.9rem;
+            margin-top: 10px;
+        }
+        /* layout dos columnas */
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 340px;
+            gap: 24px;
+        }
+        /* productos */
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
+        .product-card {
+            background: white;
+            border-radius: 28px;
+            padding: 18px;
+            box-shadow: 0 6px 14px rgba(0,0,0,0.05);
+            transition: 0.2s;
+            border: 1px solid #ffe0b5;
+        }
+        .product-name {
+            font-size: 1.3rem;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+        }
+        .price {
+            color: #e67e22;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+        .product-desc {
+            font-size: 0.8rem;
+            color: #7f8c8d;
+            margin: 8px 0;
+        }
+        .type-selector {
+            margin: 15px 0 12px;
+            display: flex;
+            gap: 10px;
+            background: #fef5e8;
+            padding: 6px;
+            border-radius: 48px;
+        }
+        .type-btn {
+            flex: 1;
+            text-align: center;
+            padding: 6px;
+            border-radius: 40px;
+            cursor: pointer;
+            background: transparent;
+            font-weight: bold;
+            transition: 0.2s;
+            border: none;
+        }
+        .type-btn.active {
+            background: #e67e22;
+            color: white;
+        }
+        .unit-control {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin: 12px 0;
+        }
+        .qty-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #fbf7f0;
+            padding: 8px 12px;
+            border-radius: 48px;
+        }
+        .qty-row button {
+            background: #e67e22;
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 30px;
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: white;
+            cursor: pointer;
+        }
+        .qty-row span {
+            font-weight: bold;
+            font-size: 1.2rem;
+            min-width: 40px;
+            text-align: center;
+        }
+        .lb-options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin: 10px 0;
+        }
+        .lb-btn {
+            background: #f0e4d0;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 32px;
+            font-weight: bold;
+            flex: 1;
+            text-align: center;
+            cursor: pointer;
+            transition: 0.1s;
+        }
+        .lb-btn.selected {
+            background: #e67e22;
+            color: white;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        }
+        .custom-lb {
+            display: flex;
+            gap: 6px;
+            margin-top: 6px;
+        }
+        .custom-lb input {
+            flex: 2;
+            padding: 8px;
+            border-radius: 28px;
+            border: 1px solid #ddd;
+            text-align: center;
+        }
+        .add-btn {
+            width: 100%;
+            background: #27ae60;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 40px;
+            font-weight: bold;
+            font-size: 1rem;
+            margin-top: 12px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        /* carrito */
+        .cart-panel {
+            background: white;
+            border-radius: 32px;
+            padding: 20px;
+            position: sticky;
+            top: 20px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+            height: fit-content;
+        }
+        .cart-title {
+            font-size: 1.5rem;
+            border-bottom: 2px solid #f0c48b;
+            padding-bottom: 12px;
+            margin-bottom: 16px;
+        }
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 14px;
+            font-size: 0.9rem;
+            padding-bottom: 8px;
+            border-bottom: 1px dashed #eee;
+        }
+        .cart-item-name {
+            flex: 2;
+        }
+        .cart-item-qty {
+            font-weight: bold;
+            margin: 0 10px;
+        }
+        .cart-item-price {
+            font-weight: bold;
+            color: #e67e22;
+        }
+        .remove-item {
+            background: none;
+            border: none;
+            color: #c0392b;
+            font-weight: bold;
+            cursor: pointer;
+            margin-left: 8px;
+        }
+        .cart-total {
+            margin-top: 16px;
+            font-size: 1.3rem;
+            font-weight: bold;
+            text-align: right;
+            border-top: 2px solid #eee;
+            padding-top: 12px;
+        }
+        .checkout-btn {
+            background: #e67e22;
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 48px;
+            color: white;
+            font-weight: bold;
+            margin-top: 20px;
+            cursor: pointer;
+        }
+        .empty-cart {
+            text-align: center;
+            color: gray;
+        }
+        @media (max-width: 800px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+            .cart-panel {
+                position: static;
+                margin-top: 20px;
+            }
+        }
+        .toast-msg {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background: #2c3e50;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 60px;
+            z-index: 999;
+            opacity: 0;
+            transition: 0.2s;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+<div class="app-container">
+    <div class="header">
+        <h1>🛒 Colmado Doña Juana 🍛</h1>
+        <div>Venta por unidad | Por libras (¼, ½, ¾, 1lb o personalizado)</div>
+        <div class="cart-badge">🚚 Envios a domicilio | Aceptamos efectivo y transferencia</div>
+    </div>
+
+    <div class="main-grid">
+        <!-- Lista de productos -->
+        <div class="products-grid" id="productsGrid"></div>
+
+        <!-- Carrito lateral -->
+        <div class="cart-panel" id="cartPanel">
+            <div class="cart-title">🛍️ Tu pedido</div>
+            <div id="cartItemsList"></div>
+            <div id="cartTotal"></div>
+            <button class="checkout-btn" id="checkoutBtn">✅ Hacer pedido (Simular)</button>
+        </div>
+    </div>
+</div>
+<div id="toastMsg" class="toast-msg">✨ Agregado al carrito</div>
+
+<script>
+    // ----- CATÁLOGO DE PRODUCTOS (con tipos de venta)
+    const productos = [
+        { id: 1, nombre: "Arroz Pilón", precioPorUnidad: 45, precioPorLibra: 22, unidadBase: "libra", tieneUnidad: true, tieneLibra: true, imagen: "🍚" },
+        { id: 2, nombre: "Frijoles Rojos", precioPorUnidad: 60, precioPorLibra: 35, unidadBase: "libra", tieneUnidad: true, tieneLibra: true, imagen: "🫘" },
+        { id: 3, nombre: "Huevos (docena)", precioPorUnidad: 85, precioPorLibra: null, tieneUnidad: true, tieneLibra: false, imagen: "🥚" },
+        { id: 4, nombre: "Queso Fresco", precioPorUnidad: null, precioPorLibra: 120, tieneUnidad: false, tieneLibra: true, imagen: "🧀" },
+        { id: 5, nombre: "Tomate", precioPorUnidad: 8, precioPorLibra: 25, tieneUnidad: true, tieneLibra: true, imagen: "🍅" },
+        { id: 6, nombre: "Cebolla", precioPorUnidad: 7, precioPorLibra: 20, tieneUnidad: true, tieneLibra: true, imagen: "🧅" },
+        { id: 7, nombre: "Pollo Entero", precioPorUnidad: 180, precioPorLibra: 65, tieneUnidad: true, tieneLibra: true, imagen: "🍗" },
+        { id: 8, nombre: "Azúcar", precioPorUnidad: 40, precioPorLibra: 18, tieneUnidad: true, tieneLibra: true, imagen: "🍬" },
+        { id: 9, nombre: "Café Molido", precioPorUnidad: 210, precioPorLibra: 98, tieneUnidad: true, tieneLibra: true, imagen: "☕" }
+    ];
+
+    // Carrito: { id, nombre, tipoVenta, cantidad, precioTotal, detallePrecio, precioUnitarioReferencia }
+    let cart = [];
+
+    // ========== FUNCIONES DE AGREGADO ==========
+    function addByUnit(product, cantidadUnidades) {
+        if (cantidadUnidades <= 0) return false;
+        const precioUnit = product.precioPorUnidad;
+        const total = precioUnit * cantidadUnidades;
+        cart.push({
+            id: product.id,
+            nombre: product.nombre,
+            tipoVenta: `📦 ${cantidadUnidades} unidad(es)`,
+            cantidad: cantidadUnidades,
+            precioTotal: total,
+            detallePrecio: `$${precioUnit}/u → $${total}`,
+            rawData: { productId: product.id }
+        });
+        return true;
+    }
+
+    function addByPound(product, libras) {
+        if (libras <= 0) return false;
+        const precioLb = product.precioPorLibra;
+        const total = precioLb * libras;
+        let fraccionTexto = "";
+        if (libras === 0.25) fraccionTexto = "¼ libra";
+        else if (libras === 0.5) fraccionTexto = "½ libra";
+        else if (libras === 0.75) fraccionTexto = "¾ libra";
+        else if (libras === 1) fraccionTexto = "1 libra";
+        else fraccionTexto = `${libras} libras`;
+        
+        cart.push({
+            id: product.id,
+            nombre: product.nombre,
+            tipoVenta: `⚖️ ${fraccionTexto}`,
+            cantidad: libras,
+            precioTotal: total,
+            detallePrecio: `$${precioLb}/lb → $${total.toFixed(2)}`,
+            rawData: { productId: product.id }
+        });
+        return true;
+    }
+
+    // renderizar carrito + totales
+    function renderCart() {
+        const cartDiv = document.getElementById('cartItemsList');
+        const totalDiv = document.getElementById('cartTotal');
+        if (!cartDiv) return;
+        
+        if (cart.length === 0) {
+            cartDiv.innerHTML = '<div class="empty-cart">🛒 El carrito está vacío. Agrega unidades o libras.</div>';
+            totalDiv.innerHTML = '';
+            return;
+        }
+        
+        let html = '';
+        let totalGeneral = 0;
+        cart.forEach((item, idx) => {
+            totalGeneral += item.precioTotal;
+            html += `
+                <div class="cart-item">
+                    <div class="cart-item-name">
+                        <strong>${item.nombre}</strong><br>
+                        <small>${item.tipoVenta}</small>
+                        <div style="font-size:0.7rem; color:#888;">${item.detallePrecio}</div>
+                    </div>
+                    <div class="cart-item-price">$${item.precioTotal.toFixed(2)}</div>
+                    <button class="remove-item" data-index="${idx}">🗑️</button>
+                </div>
+            `;
+        });
+        cartDiv.innerHTML = html;
+        totalDiv.innerHTML = `<div class="cart-total">💰 Total: $${totalGeneral.toFixed(2)}</div>`;
+        
+        // eventos para eliminar
+        document.querySelectorAll('.remove-item').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const index = parseInt(btn.getAttribute('data-index'));
+                if (!isNaN(index)) {
+                    cart.splice(index, 1);
+                    renderCart();
+                    showToast("❌ Producto eliminado");
+                }
+            });
+        });
+    }
+
+    function showToast(msg) {
+        const toast = document.getElementById('toastMsg');
+        toast.style.opacity = '1';
+        toast.innerText = msg;
+        setTimeout(() => { toast.style.opacity = '0'; }, 1800);
+    }
+
+    // construcción de cards con lógica interactiva
+    function buildProductCard(product) {
+        const card = document.createElement('div');
+        card.className = 'product-card';
+        
+        let tipoSeleccionado = 'unit'; // unit / pound
+        let cantidadUnidades = 1;
+        let librasSeleccionadas = 0.5;  // default medio lb
+        let customLbValue = 0.5;
+        
+        // funciones internas para actualizar UI según modo
+        const renderControls = () => {
+            const unitDiv = card.querySelector('.unit-control-area');
+            const poundDiv = card.querySelector('.pound-control-area');
+            if (unitDiv) unitDiv.style.display = (tipoSeleccionado === 'unit' && product.tieneUnidad) ? 'block' : 'none';
+            if (poundDiv) poundDiv.style.display = (tipoSeleccionado === 'pound' && product.tieneLibra) ? 'block' : 'none';
+            
+            // marcación activa en botones
+            const unitBtn = card.querySelector('.type-btn-unit');
+            const lbBtn = card.querySelector('.type-btn-lb');
+            if (unitBtn) {
+                if (tipoSeleccionado === 'unit' && product.tieneUnidad) unitBtn.classList.add('active');
+                else unitBtn.classList.remove('active');
+            }
+            if (lbBtn) {
+                if (tipoSeleccionado === 'pound' && product.tieneLibra) lbBtn.classList.add('active');
+                else lbBtn.classList.remove('active');
+            }
+            // si no tiene unidad, forzar a pound
+            if (!product.tieneUnidad && product.tieneLibra) tipoSeleccionado = 'pound';
+            if (!product.tieneLibra && product.tieneUnidad) tipoSeleccionado = 'unit';
+        };
+        
+        // creamos estructura interna
+        card.innerHTML = `
+            <div class="product-name">
+                <span>${product.imagen} ${product.nombre}</span>
+                ${product.precioPorUnidad ? `<span class="price">$${product.precioPorUnidad}/u</span>` : ''}
+                ${product.precioPorLibra ? `<span class="price" style="margin-left:8px;">$${product.precioPorLibra}/lb</span>` : ''}
+            </div>
+            <div class="product-desc">Venta flexible: unidades o fracciones de libra</div>
+            <div class="type-selector">
+                <button class="type-btn type-btn-unit" ${!product.tieneUnidad ? 'disabled style="opacity:0.4"' : ''}>📦 Por Unidad</button>
+                <button class="type-btn type-btn-lb" ${!product.tieneLibra ? 'disabled style="opacity:0.4"' : ''}>⚖️ Por Libra</button>
+            </div>
+            <div class="unit-control-area"></div>
+            <div class="pound-control-area"></div>
+            <button class="add-btn">➕ Agregar al carrito</button>
+        `;
+        
+        const unitArea = card.querySelector('.unit-control-area');
+        const poundArea = card.querySelector('.pound-control-area');
+        
+        // CONTROL POR UNIDAD
+        if (product.tieneUnidad) {
+            let unitQty = 1;
+            const unitHtml = `
+                <div class="unit-control">
+                    <div class="qty-row">
+                        <button class="unit-minus">-</button>
+                        <span class="unit-qty-num">1</span>
+                        <button class="unit-plus">+</button>
+                    </div>
+                    <div style="font-size:0.75rem; text-align:center">Cantidad en unidades</div>
+                </div>
+            `;
+            unitArea.innerHTML = unitHtml;
+            const qtySpan = unitArea.querySelector('.unit-qty-num');
+            const minusBtn = unitArea.querySelector('.unit-minus');
+            const plusBtn = unitArea.querySelector('.unit-plus');
+            const updateQty = () => { if(qtySpan) qtySpan.innerText = unitQty; };
+            minusBtn?.addEventListener('click', () => { if(unitQty > 1) { unitQty--; updateQty(); } });
+            plusBtn?.addEventListener('click', () => { unitQty++; updateQty(); });
+            // guardar referencia
+            card.unitQtyGetter = () => unitQty;
+        } else {
+            unitArea.innerHTML = `<div style="color:gray; font-size:0.8rem; padding:8px;">❌ No disponible por unidad</div>`;
+        }
+        
+        // CONTROL POR LIBRAS (con fracciones + custom)
+        if (product.tieneLibra) {
+            let selectedLb = 0.5;
+            const lbHtml = `
+                <div class="lb-options">
+                    <button data-lb="0.25" class="lb-btn">¼ lb</button>
+                    <button data-lb="0.5" class="lb-btn selected">½ lb</button>
+                    <button data-lb="0.75" class="lb-btn">¾ lb</button>
+                    <button data-lb="1" class="lb-btn">1 lb</button>
+                </div>
+                <div class="custom-lb">
+                    <input type="number" id="customLb_${product.id}" step="0.25" min="0.25" placeholder="Otras libras" value="0.5">
+                    <button class="set-custom-lb" style="background:#e67e22; border:none; border-radius:28px; padding:0 12px;">Aplicar</button>
+                </div>
+                <div style="font-size:0.7rem; text-align:center;">Ej: 1.25 , 2.5 libras</div>
+            `;
+            poundArea.innerHTML = lbHtml;
+            const lbBtns = poundArea.querySelectorAll('.lb-btn');
+            const customInput = poundArea.querySelector(`#customLb_${product.id}`);
+            const setCustomBtn = poundArea.querySelector('.set-custom-lb');
+            
+            const updateSelectedButton = (value) => {
+                lbBtns.forEach(btn => {
+                    if (parseFloat(btn.getAttribute('data-lb')) === value) btn.classList.add('selected');
+                    else btn.classList.remove('selected');
+                });
+                selectedLb = value;
+                if(customInput) customInput.value = value;
+            };
+            
+            lbBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const lbVal = parseFloat(btn.getAttribute('data-lb'));
+                    updateSelectedButton(lbVal);
+                });
+            });
+            
+            if(setCustomBtn) {
+                setCustomBtn.addEventListener('click', () => {
+                    let val = parseFloat(customInput.value);
+                    if(isNaN(val) || val < 0.25) val = 0.25;
+                    val = Math.round(val * 100) / 100;
+                    updateSelectedButton(val);
+                });
+            }
+            card.getSelectedLb = () => selectedLb;
+        } else {
+            poundArea.innerHTML = `<div style="color:gray; font-size:0.8rem; padding:8px;">❌ No disponible por libras</div>`;
+        }
+        
+        // BTN AGREGAR
+        const addBtn = card.querySelector('.add-btn');
+        addBtn.addEventListener('click', () => {
+            // determinar qué tipo está activo y si tiene permiso
+            const activeIsUnit = (tipoSeleccionado === 'unit' && product.tieneUnidad);
+            const activeIsPound = (tipoSeleccionado === 'pound' && product.tieneLibra);
+            
+            if (activeIsUnit) {
+                let qty = (card.unitQtyGetter ? card.unitQtyGetter() : 1);
+                if (qty > 0) {
+                    addByUnit(product, qty);
+                    showToast(`➕ ${product.nombre}: ${qty} unidad(es)`);
+                }
+            }
+            else if (activeIsPound) {
+                let lbs = (card.getSelectedLb ? card.getSelectedLb() : 0.5);
+                if (lbs > 0) {
+                    addByPound(product, lbs);
+                    showToast(`⚖️ ${product.nombre}: ${lbs} lbs`);
+                }
+            }
+            else {
+                showToast(`⚠️ ${product.nombre} no disponible en este modo`);
+            }
+            renderCart();
+        });
+        
+        // toggle de tipo
+        const unitTypeBtn = card.querySelector('.type-btn-unit');
+        const lbTypeBtn = card.querySelector('.type-btn-lb');
+        if(unitTypeBtn) {
+            unitTypeBtn.addEventListener('click', () => {
+                if(product.tieneUnidad) {
+                    tipoSeleccionado = 'unit';
+                    renderControls();
+                }
+            });
+        }
+        if(lbTypeBtn) {
+            lbTypeBtn.addEventListener('click', () => {
+                if(product.tieneLibra) {
+                    tipoSeleccionado = 'pound';
+                    renderControls();
+                }
+            });
+        }
+        // inicializar controls
+        if(!product.tieneUnidad && product.tieneLibra) tipoSeleccionado = 'pound';
+        if(!product.tieneLibra && product.tieneUnidad) tipoSeleccionado = 'unit';
+        renderControls();
+        return card;
+    }
+    
+    function loadProducts() {
+        const grid = document.getElementById('productsGrid');
+        grid.innerHTML = '';
+        productos.forEach(prod => {
+            const card = buildProductCard(prod);
+            grid.appendChild(card);
+        });
+    }
+    
+    // checkout simulado
+    document.getElementById('checkoutBtn')?.addEventListener('click', () => {
+        if(cart.length === 0) {
+            showToast("🛒 Agrega productos antes de pedir");
+            return;
+        }
+        const total = cart.reduce((sum, i) => sum + i.precioTotal, 0);
+        alert(`✨ Pedido enviado al colmado ✨\nTotal: $${total.toFixed(2)}\n📞 Pronto te contactaremos para confirmar envío o recogida.\n(Gracias por usar Colmado Doña Juana)`);
+        // Opcional: limpiar carrito si quieres - por ahora no limpiamos para demo
+        // cart = []; renderCart(); 
+    });
+    
+    loadProducts();
+    renderCart();
+</script>
+</body>
+</html>
